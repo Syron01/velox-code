@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velox Code — Lightning-Fast Code Playground</title>
+  <meta name="description" content="The fastest online code playground for Dart, HTML, JavaScript and more. Material soft dark UI, instant execution, mobile-first." />
+  <meta property="og:title" content="Velox Code — Lightning-Fast Code Playground" />
+  <meta property="og:description" content="Fastest Dart, HTML & JS playground. No lag, no wait." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/Syron01/velox-code/main/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Monaco Editor CDN via jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+  <!-- Feather Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-left">
+    <button class="hamburger" id="menuToggle" aria-label="Menu">
+      <i data-feather="menu"></i>
+    </button>
+    <a href="#" class="brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">velox<span class="brand-accent">code</span></span>
+    </a>
+  </div>
+
+  <div class="nav-center" id="langTabs">
+    <button class="lang-tab active" data-lang="dart">
+      <i data-feather="zap"></i> Dart
+    </button>
+    <button class="lang-tab" data-lang="html">
+      <i data-feather="code"></i> HTML
+    </button>
+    <button class="lang-tab" data-lang="javascript">
+      <i data-feather="terminal"></i> JavaScript
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <!-- Language selector -->
+    <div class="locale-switch" id="localeSwitcher">
+      <button class="locale-btn active" data-locale="en">EN</button>
+      <span class="locale-sep">|</span>
+      <button class="locale-btn" data-locale="tr">TR</button>
+    </div>
+    <!-- Theme toggle -->
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+      <i data-feather="moon" id="themeIcon"></i>
+    </button>
+    <!-- Share -->
+    <button class="icon-btn" id="shareBtn" aria-label="Share">
+      <i data-feather="share-2"></i>
+    </button>
+    <!-- Settings -->
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+      <i data-feather="settings"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR (mobile drawer)
+════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title" data-i18n="sidebar.examples">Examples</span>
+    <button class="icon-btn" id="closeSidebar"><i data-feather="x"></i></button>
+  </div>
+  <div class="sidebar-content">
+    <div class="snippet-group">
+      <div class="snippet-group-label">Dart</div>
+      <button class="snippet-btn" data-lang="dart" data-snippet="dart_hello">Hello World</button>
+      <button class="snippet-btn" data-lang="dart" data-snippet="dart_fibonacci">Fibonacci</button>
+      <button class="snippet-btn" data-lang="dart" data-snippet="dart_async">Async / Await</button>
+      <button class="snippet-btn" data-lang="dart" data-snippet="dart_oop">OOP Classes</button>
+    </div>
+    <div class="snippet-group">
+      <div class="snippet-group-label">HTML</div>
+      <button class="snippet-btn" data-lang="html" data-snippet="html_card">Card UI</button>
+      <button class="snippet-btn" data-lang="html" data-snippet="html_animation">CSS Animation</button>
+    </div>
+    <div class="snippet-group">
+      <div class="snippet-group-label">JavaScript</div>
+      <button class="snippet-btn" data-lang="javascript" data-snippet="js_canvas">Canvas Art</button>
+      <button class="snippet-btn" data-lang="javascript" data-snippet="js_fetch">Fetch API</button>
+    </div>
+  </div>
+</aside>
+<div class="overlay" id="overlay"></div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN LAYOUT
+════════════════════════════════════════════ -->
+<main class="main-layout" id="mainLayout">
+
+  <!-- Editor Panel -->
+  <section class="editor-panel" id="editorPanel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <i data-feather="edit-3"></i>
+        <span data-i18n="editor.title">Editor</span>
+      </div>
+      <div class="editor-actions">
+        <button class="action-btn" id="formatBtn" title="Format Code (Alt+Shift+F)">
+          <i data-feather="align-left"></i>
+        </button>
+        <button class="action-btn" id="copyBtn" title="Copy Code">
+          <i data-feather="copy"></i>
+        </button>
+        <button class="action-btn danger" id="clearBtn" title="Clear">
+          <i data-feather="trash-2"></i>
+        </button>
+        <button class="run-btn" id="runBtn" aria-label="Run">
+          <i data-feather="play"></i>
+          <span data-i18n="editor.run">Run</span>
+          <kbd>⇧↵</kbd>
+        </button>
+      </div>
+    </div>
+    <div class="editor-container" id="monacoContainer"></div>
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span id="cursorPos">Ln 1, Col 1</span>
+      <span id="langBadge" class="lang-badge">Dart</span>
+      <span id="execTime" class="exec-time"></span>
+      <span id="statusMsg" class="status-msg"></span>
+    </div>
+  </section>
+
+  <!-- Resizer -->
+  <div class="resizer" id="resizer" aria-hidden="true"></div>
+
+  <!-- Output Panel -->
+  <section class="output-panel" id="outputPanel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <i data-feather="monitor"></i>
+        <span data-i18n="output.title">Output</span>
+      </div>
+      <div class="output-actions">
+        <button class="tab-btn active" id="tabConsole" data-i18n="output.console">Console</button>
+        <button class="tab-btn" id="tabPreview" data-i18n="output.preview">Preview</button>
+        <button class="action-btn" id="clearOutputBtn" title="Clear Output">
+          <i data-feather="trash-2"></i>
+        </button>
+        <button class="action-btn" id="fullscreenPreviewBtn" title="Fullscreen Preview">
+          <i data-feather="maximize-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Console -->
+    <div class="console-output" id="consoleOutput">
+      <div class="console-welcome">
+        <div class="welcome-icon">⚡</div>
+        <p class="welcome-text" data-i18n="output.welcome">Press <kbd>Shift+Enter</kbd> or click Run to execute your code.</p>
+      </div>
+    </div>
+
+    <!-- Preview iframe -->
+    <iframe class="preview-frame hidden" id="previewFrame" title="Live Preview" sandbox="allow-scripts allow-same-origin"></iframe>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════
+     SETTINGS MODAL
+════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 data-i18n="settings.title">Settings</h3>
+      <button class="icon-btn" id="closeSettings"><i data-feather="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row">
+        <label data-i18n="settings.fontSize">Font Size</label>
+        <div class="setting-control">
+          <input type="range" id="fontSizeSlider" min="12" max="24" value="14" step="1" />
+          <span id="fontSizeValue">14px</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label data-i18n="settings.tabSize">Tab Size</label>
+        <div class="setting-control">
+          <select id="tabSizeSelect">
+            <option value="2">2 spaces</option>
+            <option value="4" selected>4 spaces</option>
+          </select>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label data-i18n="settings.minimap">Minimap</label>
+        <label class="toggle">
+          <input type="checkbox" id="minimapToggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <label data-i18n="settings.wordWrap">Word Wrap</label>
+        <label class="toggle">
+          <input type="checkbox" id="wordWrapToggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <label data-i18n="settings.autoRun">Auto-run on change</label>
+        <label class="toggle">
+          <input type="checkbox" id="autoRunToggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SHARE MODAL
+════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="shareModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 data-i18n="share.title">Share Snippet</h3>
+      <button class="icon-btn" id="closeShare"><i data-feather="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <p class="share-info" data-i18n="share.info">Your code is encoded in the URL. Share it with anyone!</p>
+      <div class="share-url-box">
+        <input type="text" id="shareUrl" readonly />
+        <button class="icon-btn" id="copyShareUrl"><i data-feather="copy"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading overlay for Dart execution -->
+<div class="dart-loading" id="dartLoading">
+  <div class="dart-spinner"></div>
+  <span data-i18n="dart.compiling">Compiling Dart…</span>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/snippets.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/runner.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
